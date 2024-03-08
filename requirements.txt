@@ -12,3 +12,6 @@ azure-identity==1.5.0  # Same, check for updates
 #matplotlib Same, check for updates
 #seaborn, check the latest version on PyPI
 
+python -m spacy download en_core_web_sm
+
+
