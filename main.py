@@ -1,12 +1,45 @@
-import spacy
+import openai
+import azure
 
+import spacy as spaCy
 
-from config import LLM_API_KEY
-
+import calc as calc
 from user_proxy_agent import UserProxyAgent
 
+import config
+
+openai_api_key = config.OPENAI_API_KEY
+
+def ask_openai(prompt, model="text-davinci-003", temperature=0.7):
+    response = openai.Completion.create(
+        engine=model,
+        prompt=prompt,
+        temperature=temperature,
+        max_tokens=2000 
+    )
+    return response.choices[0].text.strip()
+
+response = openai.Completion.create(
+    engine="text-davinci-003",
+    prompt=[
+        {"role": "system", "content": "You are Noesis, a conversational AI assistant. You re here to answer questions about Intellisync. How may I help you?\n\n"},
+        {"role": "user", "content": "What is our Gross profit margin trending over the last 3 years?"},
+        {"role": "assistant", "content": "Your Gross Profit Margin trending up by 5% in the last 3 years."},
+        {"role": "user", "content": " What is our Net Profit Margin trending over the last 3 years?"},
+    ],
+    temperature=.6 #The lower the value, the more predictable the output is. The higher the value, the more random the output is.
+)
+
+print(response.choices[0].message.content)
+
+#Connection to server string
+AZURE_SQL_CONNECTIONSTRING = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:ivorsql.database.windows.net,1433;Database=IntellisyncData;Uid=Intellisync;Pwd=TheRaptors!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+
+
+
+
 # Load the spaCy model for NLP
-nlp = spacy.load("en_core_web_sm") 
+nlp = spaCy.load("en_core_web_sm") 
 
 # Initialize the UserProxyAgent
 user_proxy_agent = UserProxyAgent("User Proxy", {"read": True, "write": True})
@@ -15,6 +48,7 @@ user_proxy_agent = UserProxyAgent("User Proxy", {"read": True, "write": True})
 user_contexts = {}
 
 def handle_user_query(user_id, user_query):
+
     # Check for existing user context, else create a new one
     context = user_contexts.get(user_id, {})
 
